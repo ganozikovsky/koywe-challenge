@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: koywe-api
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    networks:
+      - koywe-network
+
+  mongo:
+    image: mongo:latest
+    container_name: koywe-mongo
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE:-koywe}
+    restart: unless-stopped
+    networks:
+      - koywe-network
+
+volumes:
+  mongo-data:
+    driver: local
+
+networks:
+  koywe-network:
+    driver: bridge
